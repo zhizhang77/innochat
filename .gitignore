@@ -1,0 +1,11 @@
+build/
+vendor/boringssl/
+ui/node_modules/
+ui/.env
+ui/src/lib/
+ui/.svelte-kit/generated/
+ui/.svelte-kit/output/
+ui/dist/
+.claude/
+*.stripped
+*.exe
