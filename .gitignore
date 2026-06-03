@@ -3,9 +3,9 @@ vendor/boringssl/
 ui/node_modules/
 ui/.env
 ui/src/lib/
-ui/.svelte-kit/generated/
-ui/.svelte-kit/output/
+ui/.svelte-kit/
 ui/dist/
+ui-assets/
 .claude/
 *.stripped
 *.exe

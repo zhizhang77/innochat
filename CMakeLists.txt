@@ -4,6 +4,10 @@ project(innochat LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: Debug, Release, RelWithDebInfo, MinSizeRel" FORCE)
+endif()
+
 find_package(Threads REQUIRED)
 
 # ============================================
@@ -94,11 +98,30 @@ function(generate_assets_header asset_dir)
 endfunction()
 
 if(PROXY_WITH_UI)
-    find_program(NPM_EXECUTABLE npm)
+    find_program(NPM_EXECUTABLE NAMES npm.cmd npm)
+    if(WIN32 AND NPM_EXECUTABLE)
+        # On Windows CMake's execute_process uses cmd.exe which cannot
+        # run bash scripts. Force npm.cmd invocation via cmd /c.
+        get_filename_component(NPM_DIR "${NPM_EXECUTABLE}" DIRECTORY)
+        if(EXISTS "${NPM_DIR}/npm.cmd")
+            set(NPM_EXECUTABLE "${NPM_DIR}/npm.cmd")
+        endif()
+    endif()
     set(UI_BUILT_DIR "${UI_PREBUILT_DIR}")
 
     if(NPM_EXECUTABLE AND EXISTS "${UI_SOURCE_DIR}/package.json")
         message(STATUS "Building UI from source (npm: ${NPM_EXECUTABLE})...")
+
+        # Ensure node is on PATH so npm's child processes can find it
+        find_program(NODE_EXECUTABLE NAMES node.exe node)
+        if(NODE_EXECUTABLE)
+            get_filename_component(NODE_DIR "${NODE_EXECUTABLE}" DIRECTORY)
+            if(WIN32)
+                set(ENV{PATH} "${NODE_DIR};$ENV{PATH}")
+            else()
+                set(ENV{PATH} "${NODE_DIR}:$ENV{PATH}")
+            endif()
+        endif()
 
         execute_process(
             COMMAND ${NPM_EXECUTABLE} install

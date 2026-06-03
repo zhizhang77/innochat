@@ -279,6 +279,7 @@ export interface ApiChatCompletionStreamChunk {
 		delta: {
 			content?: string;
 			reasoning_content?: string;
+			reasoning?: string;
 			model?: string;
 			tool_calls?: ApiChatCompletionToolCallDelta[];
 		};
@@ -302,6 +303,7 @@ export interface ApiChatCompletionResponse {
 		message: {
 			content: string;
 			reasoning_content?: string;
+			reasoning?: string;
 			model?: string;
 			tool_calls?: ApiChatCompletionToolCall[];
 		};

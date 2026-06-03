@@ -48,6 +48,83 @@ function getAudioInputFormat(mimeType: string): AudioInputFormat {
 	return FileTypeAudio.MP3;
 }
 
+/**
+ * Streaming state machine that splits incoming text on `<think>...</think>` tags.
+ *
+ * Content inside `<think>` blocks is routed to the reasoning channel so the UI
+ * can display it as a collapsible "Reasoning" section. This handles the Qwen /
+ * newapi pattern where thinking content is embedded in the regular `content`
+ * field rather than in a separate `reasoning_content` delta field.
+ *
+ * Partial tags (split across SSE chunks) are buffered internally until the
+ * next `feed()` call completes them.
+ */
+class ThinkTagParser {
+	private buffer = '';
+	private inThink = false;
+
+	/** Feed the next chunk of text. Returns the split output. */
+	feed(text: string): { think: string; content: string } {
+		this.buffer += text;
+		let think = '';
+		let content = '';
+
+		while (this.buffer.length > 0) {
+			if (this.inThink) {
+				const endIdx = this.buffer.indexOf('</think>');
+				if (endIdx === -1) {
+					think += this.buffer;
+					this.buffer = '';
+				} else {
+					think += this.buffer.substring(0, endIdx);
+					this.buffer = this.buffer.substring(endIdx + 8);
+					this.inThink = false;
+				}
+			} else {
+				const startIdx = this.buffer.indexOf('<think>');
+				if (startIdx === -1) {
+					const partialAt = this.partialOpenTagAtEnd();
+					if (partialAt >= 0) {
+						content += this.buffer.substring(0, partialAt);
+						this.buffer = this.buffer.substring(partialAt);
+					} else {
+						content += this.buffer;
+						this.buffer = '';
+					}
+					break;
+				} else {
+					content += this.buffer.substring(0, startIdx);
+					this.buffer = this.buffer.substring(startIdx + 7);
+					this.inThink = true;
+				}
+			}
+		}
+
+		return { think, content };
+	}
+
+	/** Flush any buffered partial tag as regular content. */
+	flush(): string {
+		const tail = this.buffer;
+		this.buffer = '';
+		this.inThink = false;
+		return tail;
+	}
+
+	/** If the buffer ends with a partial `<think>` opening tag return its start index, else -1. */
+	private partialOpenTagAtEnd(): number {
+		const tag = '<think>';
+		// look back at most tag.length-1 chars for a '<' that starts a prefix of '<think>'
+		const lookBack = Math.min(this.buffer.length, tag.length - 1);
+		for (let i = this.buffer.length - lookBack; i < this.buffer.length; i++) {
+			if (this.buffer[i] === '<' && tag.startsWith(this.buffer.substring(i))) {
+				return i;
+			}
+		}
+		return -1;
+	}
+}
+
 export class ChatService {
 	/**
 	 *
@@ -617,7 +694,7 @@ export class ChatService {
 							const parsed: ApiChatCompletionStreamChunk = JSON.parse(data);
 							const choice = parsed.choices?.[0];
 							const content = choice?.delta?.content;
-							const reasoningContent = choice?.delta?.reasoning_content;
+							const reasoningContent = choice?.delta?.reasoning_content || choice?.delta?.reasoning;
 							const toolCalls = choice?.delta?.tool_calls;
 							const timings = parsed.timings;
 							const promptProgress = parsed.prompt_progress;
@@ -727,8 +804,17 @@ export class ChatService {
 				onModel?.(responseModel);
 			}
 
-			const content = data.choices[0]?.message?.content || '';
-			const reasoningContent = data.choices[0]?.message?.reasoning_content;
+			let content = data.choices[0]?.message?.content || '';
+			let reasoningContent = data.choices[0]?.message?.reasoning_content || data.choices[0]?.message?.reasoning;
+
+			// Extract <think>...</think> blocks from content into reasoningContent
+			const thinkParser = new ThinkTagParser();
+			const split = thinkParser.feed(content);
+			const tail = thinkParser.flush();
+			if (split.think) {
+				reasoningContent = reasoningContent ? reasoningContent + split.think : split.think;
+			}
+			content = split.content + tail;
 			const toolCalls = data.choices[0]?.message?.tool_calls;
 
 			let serializedToolCalls: string | undefined;
