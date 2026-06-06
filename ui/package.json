@@ -5,6 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "bash scripts/dev.sh",
+		"prebuild": "node scripts/setup-lib-link.js",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
