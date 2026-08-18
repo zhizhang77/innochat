@@ -24,7 +24,7 @@ import type {
 	SettingsSectionEntry,
 	SettingsSection
 } from '$lib/types';
-import { CLI_FLAGS, DEFAULT_MCP_CONFIG } from '$lib/constants';
+import { DEFAULT_MCP_CONFIG } from '$lib/constants';
 import McpLogo from '$lib/components/app/mcp/McpLogo.svelte';
 import { SETTINGS_KEYS } from './settings-keys';
 import { ROUTES, SETTINGS_SECTION_SLUGS } from './routes';
@@ -74,14 +74,6 @@ const SETTINGS_REGISTRY: Record<string, SettingsSectionEntry> = {
 				section: SETTINGS_SECTION_SLUGS.GENERAL,
 				options: COLOR_MODE_OPTIONS,
 				sync: { serverKey: SETTINGS_KEYS.THEME, paramType: SyncableParameterType.STRING }
-			},
-			{
-				key: SETTINGS_KEYS.API_KEY,
-				label: 'API Key',
-				help: `Set the API Key if you are using <code> ${CLI_FLAGS.API_KEY} </code> option for the server.`,
-				defaultValue: '',
-				type: SettingsFieldType.INPUT,
-				section: SETTINGS_SECTION_SLUGS.GENERAL
 			},
 			{
 				key: SETTINGS_KEYS.SYSTEM_MESSAGE,
