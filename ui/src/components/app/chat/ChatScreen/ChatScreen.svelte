@@ -39,6 +39,7 @@
 	import { isFileTypeSupported, filterFilesByModalities } from '$lib/utils';
 	import { parseFilesToMessageExtras, processFilesToChatUploaded } from '$lib/utils/browser-only';
 	import { onMount } from 'svelte';
+	import ChatScreenConversationStats from './ChatScreenConversationStats.svelte';
 	import ChatScreenGreeting from './ChatScreenGreeting.svelte';
 
 	let { showCenteredEmpty = false } = $props();
@@ -427,6 +428,8 @@
 				<ChatScreenProcessingInfo onVisibilityChange={handleProcessingInfoVisibility} />
 
 				<ChatScreenServerError />
+
+				<ChatScreenConversationStats />
 
 				<div class="conversation-chat-form pointer-events-auto rounded-t-3xl">
 					<ChatScreenForm

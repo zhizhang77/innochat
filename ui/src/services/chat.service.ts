@@ -1,6 +1,7 @@
 import { getJsonHeaders } from '$lib/utils/api-headers';
 import { formatAttachmentText } from '$lib/utils/formatters';
 import { isAbortError } from '$lib/utils/abort';
+import { timingsFromUsage } from '$lib/utils/timings-from-usage';
 import {
 	ATTACHMENT_LABEL_PDF_FILE,
 	ATTACHMENT_LABEL_MCP_PROMPT,
@@ -638,6 +639,10 @@ export class ChatService {
 		let fullReasoningContent = '';
 		let aggregatedToolCalls: ApiChatCompletionToolCall[] = [];
 		let lastTimings: ChatMessageTimings | undefined;
+		// Client-side decode window for backends that only report OpenAI `usage`
+		// (no llama.cpp `timings`): used to synthesize predicted_ms for t/s.
+		let decodeStartMs: number | undefined;
+		let decodeEndMs: number | undefined;
 		let streamFinished = false;
 		let modelEmitted = false;
 		let toolCallIndexOffset = 0;
@@ -716,6 +721,7 @@ export class ChatService {
 							const reasoningContent = choice?.delta?.reasoning_content || choice?.delta?.reasoning;
 							const toolCalls = choice?.delta?.tool_calls;
 							const timings = parsed.timings;
+							const usage = parsed.usage;
 							const promptProgress = parsed.prompt_progress;
 
 							const chunkModel = ChatService.extractModelName(parsed);
@@ -731,6 +737,18 @@ export class ChatService {
 							if (timings) {
 								ChatService.notifyTimings(timings, promptProgress, onTimings);
 								lastTimings = timings;
+							} else if (usage) {
+								// OpenAI-compatible backends (vLLM, etc.) don't emit llama.cpp
+								// `timings`; synthesize them from the `usage` object they send in
+								// the final chunk so token counts and t/s still work.
+								decodeEndMs ??= Date.now();
+								const predictedMs =
+									decodeStartMs !== undefined
+										? Math.max(0, decodeEndMs - decodeStartMs)
+										: undefined;
+								const usageTimings = timingsFromUsage(usage, predictedMs);
+								ChatService.notifyTimings(usageTimings, promptProgress, onTimings);
+								lastTimings = usageTimings;
 							}
 
 							if (content) {
@@ -747,6 +765,12 @@ export class ChatService {
 								if (!abortSignal?.aborted) {
 									onReasoningChunk?.(reasoningContent);
 								}
+							}
+
+							// First generated token marks the start of the decode window used
+							// to estimate predicted_ms when the backend only reports `usage`.
+							if (content || reasoningContent) {
+								decodeStartMs ??= Date.now();
 							}
 
 							processToolCallDelta(toolCalls);
@@ -855,7 +879,9 @@ export class ChatService {
 				throw noResponseError;
 			}
 
-			onComplete?.(content, reasoningContent, undefined, serializedToolCalls);
+			const timings = data.usage ? timingsFromUsage(data.usage) : undefined;
+
+			onComplete?.(content, reasoningContent, timings, serializedToolCalls);
 
 			return content;
 		} catch (error) {

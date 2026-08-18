@@ -296,7 +296,22 @@ export interface ApiChatCompletionStreamChunk {
 		predicted_ms?: number;
 		cache_n?: number;
 	};
+	usage?: ApiUsage;
 	prompt_progress?: ChatMessagePromptProgress;
+}
+
+/**
+ * OpenAI-standard token usage. Emitted by OpenAI-compatible backends (e.g. vLLM)
+ * in the final stream chunk; the app synthesizes ChatMessageTimings from it when
+ * llama.cpp-style `timings` are absent.
+ */
+export interface ApiUsage {
+	prompt_tokens?: number;
+	completion_tokens?: number;
+	total_tokens?: number;
+	prompt_tokens_details?: {
+		cached_tokens?: number;
+	};
 }
 
 export interface ApiChatCompletionResponse {
@@ -313,6 +328,7 @@ export interface ApiChatCompletionResponse {
 		};
 		finish_reason?: string | null;
 	}>;
+	usage?: ApiUsage;
 }
 
 export interface ApiSlotData {

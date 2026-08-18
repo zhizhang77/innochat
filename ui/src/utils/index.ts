@@ -46,6 +46,10 @@ export { extractRootDomain, sanitizeExternalUrl } from './url';
 
 // Conversation utilities
 export { createMessageCountMap, getMessageCount } from './conversation-utils';
+export {
+	computeConversationTokenStats,
+	type ConversationTokenStats
+} from './conversation-stats';
 
 // Clipboard utilities
 export {
@@ -59,6 +63,7 @@ export {
 // File preview utilities
 export { getFileTypeLabel } from './file-preview';
 export { getPreviewText, generateConversationTitle } from './text';
+export { timingsFromUsage } from './timings-from-usage';
 
 // File type utilities
 export {
