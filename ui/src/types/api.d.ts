@@ -222,6 +222,8 @@ export interface ApiChatCompletionRequest {
 	tools?: ApiChatCompletionTool[];
 	// Reasoning parameters
 	reasoning_format?: string;
+	// Thinking intensity for reasoning models (Qwen/vLLM: low | medium | xhigh)
+	reasoning_effort?: string;
 	// Generation parameters
 	temperature?: number;
 	max_tokens?: number;

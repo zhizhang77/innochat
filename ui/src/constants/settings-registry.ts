@@ -715,6 +715,13 @@ const NON_UI_SETTINGS: SettingsEntry[] = [
 		help: 'Toggle reasoning/thinking for the model. When off, chat_template_kwargs.enable_thinking=false is sent so Qwen/vLLM backends skip the thinking phase.',
 		defaultValue: true,
 		type: SettingsFieldType.CHECKBOX
+	},
+	{
+		key: SETTINGS_KEYS.THINKING_EFFORT,
+		label: 'Thinking effort',
+		help: 'Thinking intensity for reasoning models. Sends reasoning_effort=low|medium|xhigh (the values this backend accepts). "default" sends nothing so the backend default applies.',
+		defaultValue: 'default',
+		type: SettingsFieldType.SELECT
 	}
 	// {
 	// 	key: SETTINGS_KEYS.PY_INTERPRETER_ENABLED,

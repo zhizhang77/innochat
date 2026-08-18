@@ -68,5 +68,7 @@ export const SETTINGS_KEYS = {
 	// PY_INTERPRETER_ENABLED: 'pyInterpreterEnabled',
 	// Toggle thinking for reasoning models (sends chat_template_kwargs.enable_thinking=false when off)
 	THINKING_ENABLED: 'thinkingEnabled',
+	// Thinking intensity for reasoning models (sends reasoning_effort; 'default' = don't send, use backend default)
+	THINKING_EFFORT: 'thinkingEffort',
 	CUSTOM: 'custom'
 } as const;

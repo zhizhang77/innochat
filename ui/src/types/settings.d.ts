@@ -67,6 +67,8 @@ export interface SettingsChatServiceOptions {
 	excludeReasoningFromContext?: boolean;
 	// Disable thinking when false (sends chat_template_kwargs.enable_thinking=false)
 	enableThinking?: boolean;
+	// Thinking intensity (sends reasoning_effort=low|medium|xhigh; '' / undefined = backend default)
+	thinkingEffort?: string;
 	tools?: OpenAIToolDefinition[];
 	// Generation parameters
 	temperature?: number;

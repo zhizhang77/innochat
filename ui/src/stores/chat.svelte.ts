@@ -1818,6 +1818,10 @@ class ChatStore {
 
 		if (currentConfig.thinkingEnabled === false) apiOptions.enableThinking = false;
 
+		// Thinking intensity (validated against the backend whitelist in chat.service.ts)
+		if (currentConfig.thinkingEnabled !== false && hasValue(currentConfig.thinkingEffort))
+			apiOptions.thinkingEffort = currentConfig.thinkingEffort;
+
 		if (hasValue(currentConfig.temperature))
 			apiOptions.temperature = Number(currentConfig.temperature);
 

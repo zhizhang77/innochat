@@ -235,6 +235,7 @@ export class ChatService {
 			disableReasoningParsing,
 			excludeReasoningFromContext,
 			enableThinking,
+			thinkingEffort,
 			continueFinalMessage
 		} = options;
 
@@ -373,6 +374,17 @@ export class ChatService {
 		// Applied after `custom` so the explicit toggle wins over any user custom JSON.
 		if (enableThinking === false) {
 			requestBody.chat_template_kwargs = { enable_thinking: false };
+		}
+
+		// Thinking intensity for reasoning models. Only the values this backend accepts
+		// (low|medium|xhigh) are forwarded; anything else falls back to the backend
+		// default so a stale config value can never 400 the request.
+		if (
+			enableThinking !== false &&
+			thinkingEffort &&
+			['low', 'medium', 'xhigh'].includes(thinkingEffort)
+		) {
+			requestBody.reasoning_effort = thinkingEffort;
 		}
 
 		try {
