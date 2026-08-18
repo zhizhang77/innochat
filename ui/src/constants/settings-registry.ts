@@ -708,6 +708,13 @@ const NON_UI_SETTINGS: SettingsEntry[] = [
 		defaultValue: '[]',
 		type: SettingsFieldType.INPUT,
 		sync: { serverKey: SETTINGS_KEYS.MCP_SERVERS, paramType: SyncableParameterType.STRING }
+	},
+	{
+		key: SETTINGS_KEYS.THINKING_ENABLED,
+		label: 'Thinking enabled',
+		help: 'Toggle reasoning/thinking for the model. When off, chat_template_kwargs.enable_thinking=false is sent so Qwen/vLLM backends skip the thinking phase.',
+		defaultValue: true,
+		type: SettingsFieldType.CHECKBOX
 	}
 	// {
 	// 	key: SETTINGS_KEYS.PY_INTERPRETER_ENABLED,

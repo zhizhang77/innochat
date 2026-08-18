@@ -234,6 +234,7 @@ export class ChatService {
 			// Config options
 			disableReasoningParsing,
 			excludeReasoningFromContext,
+			enableThinking,
 			continueFinalMessage
 		} = options;
 
@@ -366,6 +367,12 @@ export class ChatService {
 			} catch (error) {
 				console.warn('Failed to parse custom parameters:', error);
 			}
+		}
+
+		// Disable thinking for Qwen/vLLM-style backends when the lightbulb toggle is off.
+		// Applied after `custom` so the explicit toggle wins over any user custom JSON.
+		if (enableThinking === false) {
+			requestBody.chat_template_kwargs = { enable_thinking: false };
 		}
 
 		try {

@@ -177,6 +177,13 @@ export { default as ChatFormActionsAdd } from './ChatForm/ChatFormActions/ChatFo
 export { default as ChatFormActionRecord } from './ChatForm/ChatFormActions/ChatFormActionRecord.svelte';
 
 /**
+ * Lightbulb toggle for enabling/disabling reasoning (thinking) on the current request.
+ * Writes the `thinkingEnabled` setting; when off the request sends
+ * chat_template_kwargs.enable_thinking=false for Qwen/vLLM backends.
+ */
+export { default as ChatFormActionThinking } from './ChatForm/ChatFormActions/ChatFormActionThinking.svelte';
+
+/**
  * Container for chat form action buttons. Arranges file attachment, audio record,
  * and submit/stop buttons in a horizontal layout. Handles conditional visibility
  * based on model capabilities and loading state.

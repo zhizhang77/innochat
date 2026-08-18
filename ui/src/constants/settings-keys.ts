@@ -66,5 +66,7 @@ export const SETTINGS_KEYS = {
 	EXCLUDE_REASONING_FROM_CONTEXT: 'excludeReasoningFromContext',
 	SHOW_RAW_OUTPUT_SWITCH: 'showRawOutputSwitch',
 	// PY_INTERPRETER_ENABLED: 'pyInterpreterEnabled',
+	// Toggle thinking for reasoning models (sends chat_template_kwargs.enable_thinking=false when off)
+	THINKING_ENABLED: 'thinkingEnabled',
 	CUSTOM: 'custom'
 } as const;

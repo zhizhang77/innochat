@@ -248,6 +248,8 @@ export interface ApiChatCompletionRequest {
 	backend_sampling?: boolean;
 	// Custom parameters (JSON string)
 	custom?: Record<string, unknown>;
+	// vLLM/Qwen chat template kwargs (e.g. enable_thinking)
+	chat_template_kwargs?: { enable_thinking?: boolean };
 	timings_per_token?: boolean;
 	// Continuation control (vLLM compat)
 	add_generation_prompt?: boolean;

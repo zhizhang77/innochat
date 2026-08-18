@@ -65,6 +65,8 @@ export interface SettingsChatServiceOptions {
 	disableReasoningParsing?: boolean;
 	// Strip reasoning content from context before sending
 	excludeReasoningFromContext?: boolean;
+	// Disable thinking when false (sends chat_template_kwargs.enable_thinking=false)
+	enableThinking?: boolean;
 	tools?: OpenAIToolDefinition[];
 	// Generation parameters
 	temperature?: number;
